@@ -7,8 +7,9 @@ namespace Tetris
         private Int16 boardRows = 20;
         private Int16 boardCols = 20;
         private Int16 infoCols = 20;
+        private Int16 score = 0;
+        private Int16 scorePerLine = 10;
         private bool[,]? tetrisBoardMap;
-        public bool[,]? TetrisBoardMap { get => tetrisBoardMap;}
         private TetrisBoardUI? boardUI;
         private TetrisPiece? currentPiece;
         public TetrisBoard()
@@ -18,6 +19,11 @@ namespace Tetris
             boardUI.DrawFrame();
             boardUI.DrawInfo();
             boardUI.DrawTetrisBoard(tetrisBoardMap);
+        }
+        public void ForceMovePiece()
+        {
+            if (currentPiece == null) return;
+                currentPiece.ForcePieceDown();
         }
         public void UpdateTetrisBoard()
         {
@@ -32,7 +38,17 @@ namespace Tetris
         {
             if (tetrisBoardMap == null) return;
             currentPiece = new TetrisPiece(tetrisBoardMap);
-            currentPiece.onCollision += AddPieceToStaticPosition;
+            currentPiece.onCollision += OnPieceCollision;
+        }
+        private void OnPieceCollision()
+        {
+            AddPieceToStaticPosition();
+            if (currentPiece == null) return;
+            currentPiece.Dispose();
+            CreateNewPiece();
+            score += (short)(GetFullLines() * scorePerLine);
+            if (boardUI == null) return;
+            boardUI.ChangeScore(score);
         }
         private void AddPieceToStaticPosition()
         {
@@ -47,10 +63,36 @@ namespace Tetris
                     }
                 }
             }
-            currentPiece.Dispose();
-            CreateNewPiece();
-            // CurrentFigure = NextFigure;
-            // GetNextFigure();
+        }
+        private Int16 GetFullLines()
+        {
+            if (tetrisBoardMap == null) return 0;
+            Int16 lines = 0;
+            for (int row = 0; row < tetrisBoardMap.GetLength(0); row++)
+            {
+                bool isRowFull = true;
+                for (int col = 0; col < tetrisBoardMap.GetLength(1); col++)
+                {
+                    if (!tetrisBoardMap[row, col])
+                    {
+                        isRowFull = false;
+                        break;
+                    }
+                }
+                if (isRowFull)
+                {
+                    for (int rowToMove = row; rowToMove >= 1; rowToMove--)
+                    {
+                        for (int col = 0; col < tetrisBoardMap.GetLength(1); col++)
+                        {
+                            tetrisBoardMap[rowToMove, col] = tetrisBoardMap[rowToMove - 1, col];
+                        }
+                    }
+
+                    lines++;
+                }
+            }
+            return lines;
         }
     }
     public class TetrisBoardUI
@@ -107,10 +149,10 @@ namespace Tetris
             //Write(HighScore.ToString(), 11, board.TetrisCols + 3);
             Write("Next figure:", 13, tetrisCols + 3);
             // DrawNextFigure();
-            Write("Keys:", 18, tetrisCols + 3);
-            Write("  ^  ", 19, tetrisCols + 3);
-            Write("<   >", 20, tetrisCols + 3);
-            Write("  v ", 21, tetrisCols + 3);
+            // Write("Keys:", 18, tetrisCols + 3);
+            // Write("  ^  ", 19, tetrisCols + 3);
+            // Write("<   >", 20, tetrisCols + 3);
+            // Write("  v ", 21, tetrisCols + 3);
         }
         public void DrawTetrisBoard(bool [,] _board)
         {

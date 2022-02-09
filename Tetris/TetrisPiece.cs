@@ -29,15 +29,17 @@ namespace Tetris
             }
             GC.SuppressFinalize(this);
         }
-        // public void MoveDown(bool [,] _board)
-        // {
-        //     if (piece == null) return;
-        //     Vector2 downDir = new Vector2(0,1);
-        //     if (currentPosition.Y < boardRows-1-piece.GetLength(0))
-        //         currentPosition += downDir;
-        // }
-        
-        public void CheckCollision()
+        public void ForcePieceDown()
+        {
+            Vector2 downDir = new Vector2(0,1);
+            if (piece == null || board == null) return;
+            {
+                if (currentPosition.Y < board.GetLength(0)-1-piece.GetLength(0))
+                    currentPosition += downDir;
+            }
+            CheckCollision();
+        }
+        private void CheckCollision()
         {
             if (piece == null || board == null) return;
             if (currentPosition.X > board.GetLength(1) - piece.GetLength(1))
@@ -62,19 +64,14 @@ namespace Tetris
         private void TetrisMovement(Vector2 _direction)
         {
             if (piece == null || board == null) return;
-            if (_direction.X == 1)
+            if (_direction.X == 1) //left
             {
                 if ((currentPosition.X < board.GetLength(1) - piece.GetLength(1)))
                     currentPosition += _direction;
             }
-            else if(_direction.X == -1)
+            else if(_direction.X == -1) //right
             {
                 if (currentPosition.X >= 1)
-                    currentPosition += _direction;
-            }
-            else if (_direction.Y == 1)
-            {
-                if (currentPosition.Y < board.GetLength(0)-1-piece.GetLength(0))
                     currentPosition += _direction;
             }
             CheckCollision();

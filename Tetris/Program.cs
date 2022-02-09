@@ -9,26 +9,20 @@ namespace Tetris
         private static TetrisBoard board = new TetrisBoard();
         private static void Main(string[] args)
         {
-           
             CreateWindow(TetrisBoardData.TetrisRow,TetrisBoardData.TetrisCols+TetrisBoardData.InfoCols);
             board.CreateNewPiece();
+            inputReader.Initialize();
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
             while(true)
             {
-                inputReader.ReadInput();
-                board.UpdateTetrisBoard();
-                // if (board.TetrisBoardMap != null)
-                // {
-                //     // if (currentPiece.CheckCollision(board.TetrisBoardMap))
-                //     // {
-                //     //     board.AddPieceToStaticPosition(currentPiece);
-                //     //     currentPiece.Dispose();
-                //     //     currentPiece = new TetrisPiece(TetrisBoardData.TetrisRow,TetrisBoardData.TetrisCols);
-                //     //     //int lines = CheckForFullLines();
-                //     //     //add points to score
-                //     //     //Score += ScorePerLines[lines] * Level;
-                //     //     //CurrentFigure = NextFigure;
-                //     // }
-                // }
+                TimeSpan timePassed = stopWatch.Elapsed;
+                if (timePassed.TotalSeconds >= 0.7f) //the reason I choose 0.7 seconds because it's feel better to play
+                {
+                    board.ForceMovePiece();
+                    board.UpdateTetrisBoard();
+                    stopWatch.Restart();
+                } 
             }
         }
         private static void CreateWindow(int boardRows,int boardColumns)
