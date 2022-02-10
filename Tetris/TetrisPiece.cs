@@ -9,19 +9,20 @@ namespace Tetris
         private bool [,]? board;
         private bool[,]? piece;
         public bool[,]? Piece { get => piece;}
+        private string pieceDescription = "";
+        public string PieceDescription {get => pieceDescription;}
         private Vector2 currentPosition;
         public Vector2 CurrentPosition { get => currentPosition;}
         public TetrisPiece(bool [,] _board)
         {
             this.board = _board;
             InputReader.onMovementKeyPressed += TetrisMovement;   
-            InputReader.onRotationKeyPressed +=  TetrisRotation;
-            SpawnPiece();
+            InputReader.onRotationKeyPressed +=  TetrisTryRotation;
         }
         public void Dispose()
         {
             InputReader.onMovementKeyPressed -= TetrisMovement;   
-            InputReader.onRotationKeyPressed -=  TetrisRotation;
+            InputReader.onRotationKeyPressed -=  TetrisTryRotation;
             if (onCollision != null)
             {
                 foreach(Delegate d in onCollision.GetInvocationList())
@@ -36,10 +37,19 @@ namespace Tetris
             Vector2 downDir = new Vector2(0,1);
             if (piece == null || board == null) return;
             {
-                if (currentPosition.Y < board.GetLength(0)-1-piece.GetLength(0))
+                if (currentPosition.Y + piece.GetLength(0) < board.GetLength(0)-1) //board row length - 1, because the border
                     currentPosition += downDir;
             }
             CheckCollision();
+        }
+        public void SpawnPiece()
+        {
+            if (board == null) return;
+            Int16 initialLine = 1;
+            var randomPiece = tetrisAssets.GetRandomPiece();
+            piece = randomPiece.Key;
+            pieceDescription = randomPiece.Value;
+            currentPosition = new Vector2(new Random().Next(0,board.GetLength(1)-piece.GetLength(1)),initialLine);
         }
         private void CheckCollision()
         {
@@ -56,7 +66,7 @@ namespace Tetris
             {
                 for (int col = 0; col < piece.GetLength(1); col++)
                 {
-                    if (piece[row, col] && board[(int)currentPosition.Y + row + 1, (int)currentPosition.X + col])
+                    if (piece[row, col] && board[(int)currentPosition.Y + row +1, (int)currentPosition.X + col])
                     {
                         onCollision?.Invoke();
                     }
@@ -66,30 +76,27 @@ namespace Tetris
         private void TetrisMovement(Vector2 _direction)
         {
             if (piece == null || board == null) return;
-            if (_direction.X == 1) //left (right person perspective)
+            if (_direction.X == 1) //left (right user perspective)
             {
                 if (currentPosition.X + piece.GetLength(1) < board.GetLength(1))
                 {
-                    bool movementAllowed = true;
+                    bool movementAllowed = false;
                     for (int row = 0; row < piece.GetLength(0); row++)
                     {
-                        for (int col = 0; col < piece.GetLength(1); col++)
-                        {
-                            if (piece[row, col] && !board[(int)currentPosition.Y + row, (int)currentPosition.X +col+(int)_direction.X])
-                                movementAllowed = true;
-                            else if (piece[row,col] && board[(int)currentPosition.Y + row, (int)currentPosition.X +col+(int)_direction.X])
-                                movementAllowed = false;
-                        }
+                        if (piece[row, piece.GetLength(1)-1] && !board[(int)currentPosition.Y + row, (int)currentPosition.X +piece.GetLength(1)-1+(int)_direction.X])
+                            movementAllowed = true;
+                        else if (piece[row,piece.GetLength(1)-1] && board[(int)currentPosition.Y + row, (int)currentPosition.X +piece.GetLength(1)-1+(int)_direction.X])
+                            movementAllowed = false;
                     }
                     if (movementAllowed)
                         currentPosition += _direction;
                 }
             }
-            else if(_direction.X == -1) //right (left person perspective)
+            else if(_direction.X == -1) //right (left user perspective)
             {
                 if (currentPosition.X > 0)
                 {
-                    bool movementAllowed = true;
+                    bool movementAllowed = false;
                     for (int row = 0; row < piece.GetLength(0); row++)
                     {
                         for (int col = 0; col < piece.GetLength(1); col++)
@@ -106,7 +113,7 @@ namespace Tetris
             }
             CheckCollision();
         }
-        private void TetrisRotation(Vector2 _direction)
+        private void TetrisTryRotation(Vector2 _direction)
         {
             if( piece == null) return;
             bool[,] previewRotatedPiece = new bool[piece.GetLength(1), piece.GetLength(0)];
@@ -159,58 +166,69 @@ namespace Tetris
             }
             return true;
         }
-        private void SpawnPiece()
-        {
-            if (board == null) return;
-            Int16 initialLine = 1;
-            piece = tetrisAssets.GetRandomPiece();
-            currentPosition = new Vector2(new Random().Next(0,board.GetLength(1)-piece.GetLength(1)),initialLine);
-        }
     }
     public class TetrisAssets
     {
         private Random Random = new Random();
-        List<bool[,]> tetrisFigures = new List<bool[,]>()
+        private Dictionary<bool[,],string> pieces = new Dictionary<bool[,], string>()
         {
-            new bool [,] // I
             {
-                {true, true, true, true }
+                new bool[,] {{true,true,true,true}},"I"
             },
-            new bool [,] // O
             {
-                {true, true },
-                {true, true }
+                new bool[,] 
+                {
+                    {true,true},
+                    {true,true}
+                }, 
+                "O"
             },
-            new bool [,] // T
             {
-                {false, true, false},
-                {true, true ,true}
+                new bool [,]
+                {
+                    {false, true, false},
+                    {true, true ,true}
+                },
+                "T"
             },
-            new bool [,] // S
             {
-                {false, true, true},
-                {true, true, false}
+                new bool [,]
+                {
+                    {false, true, true},
+                    {true, true, false}
+                },
+                "S"
             },
-            new bool[,] // Z
             {
-                {true, true, false},
-                {false, true, true}
+                new bool[,] // Z
+                {
+                    {true, true, false},
+                    {false, true, true}
+                },
+                "Z"
             },
-            new bool[,] // J
             {
-                {false, false, true},
-                {true, true, true}
+                new bool[,] // J
+                {
+                    {false, false, true},
+                    {true, true, true}
+                },
+                "J"
             },
-            new bool[,] // L
             {
-                {true, false, false},
-                {true, true, true}
+                new bool[,] // L
+                {
+                    {true, false, false},
+                    {true, true, true}
+                },
+                "L"
             }
         };
-        public bool[,] GetRandomPiece()
+        public KeyValuePair<bool[,],string> GetRandomPiece()
         {
-            return tetrisFigures[Random.Next(0, tetrisFigures.Count)];
+            return pieces.ElementAt(Random.Next(0,pieces.Count));
         }
+
     }
 
 }

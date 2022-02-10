@@ -10,15 +10,16 @@ namespace Tetris
         public static bool isGameOver = false;
         private static void Main(string[] args)
         {
-            CreateWindow(TetrisBoardData.TetrisRow,TetrisBoardData.TetrisCols+TetrisBoardData.InfoCols);
-            board.CreateNewPiece();
+            CreateWindow(TetrisBoard.BoardRows,TetrisBoard.BoardCols+TetrisBoard.InfoCols);
             inputReader.Initialize();
+            board.CreateTetrisUI();
+            board.CreateNewPiece();
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
             while(!isGameOver)
             {
                 TimeSpan timePassed = stopWatch.Elapsed;
-                if (timePassed.TotalSeconds >= 0.7f) //the reason I choose 0.7 seconds because it's feel better to play
+                if (timePassed.TotalSeconds >= 0.4f) //tick time
                 {
                     board.ForceMovePiece();
                     board.UpdateTetrisBoard();
@@ -29,12 +30,12 @@ namespace Tetris
         }
         private static void CreateWindow(int boardRows,int boardColumns)
         {
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
-            Console.CursorVisible = false;
-            Console.WindowHeight = boardRows+ 2;
-            Console.WindowWidth = boardColumns + 3;
-            Console.BufferHeight = boardRows+ 2;
-            Console.BufferWidth = boardColumns + 3;
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.CursorVisible = false;
+                Console.WindowHeight = boardRows+ 2;
+                Console.WindowWidth = boardColumns + 3;
+                Console.BufferHeight = boardRows+ 2;
+                Console.BufferWidth = boardColumns + 3;
         }
     }
 }

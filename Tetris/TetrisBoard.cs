@@ -4,18 +4,23 @@ namespace Tetris
 {
     public class TetrisBoard
     {
-        private Int16 boardRows = 20;
-        private Int16 boardCols = 20;
-        private Int16 infoCols = 20;
+        public const Int16 BoardRows = 20;
+        public const Int16 BoardCols = 20;
+        public const Int16 InfoCols = 20;
         private Int16 score = 0;
         private Int16 scorePerLine = 10;
         private bool[,]? tetrisBoardMap;
         private TetrisBoardUI? boardUI;
         private TetrisPiece? currentPiece;
+        private TetrisPiece? nextPiece;
         public TetrisBoard()
         {
-            tetrisBoardMap = new bool[boardRows,boardCols];
-            boardUI = new TetrisBoardUI(boardRows,boardCols,infoCols);
+            tetrisBoardMap = new bool[BoardRows,BoardCols];
+            boardUI = new TetrisBoardUI(BoardRows,BoardCols,InfoCols);
+        }
+        public void CreateTetrisUI()
+        {
+            if (boardUI == null || tetrisBoardMap == null) return;
             boardUI.DrawFrame();
             boardUI.DrawInfo();
             boardUI.DrawTetrisBoard(tetrisBoardMap);
@@ -31,20 +36,21 @@ namespace Tetris
             boardUI.DrawTetrisBoard(tetrisBoardMap);
             if (currentPiece != null && currentPiece.Piece != null)
             {
-                boardUI.DrawTetrisPiece(currentPiece.Piece,currentPiece.CurrentPosition);
+                boardUI.DrawTetrisPiece(currentPiece.Piece,currentPiece.CurrentPosition,currentPiece.PieceDescription);
             }
+            boardUI.ChangeScore(score);
         }
         public void CreateNewPiece()
         {
             if (tetrisBoardMap == null) return;
             currentPiece = new TetrisPiece(tetrisBoardMap);
             currentPiece.onCollision += OnPieceCollision;
+            currentPiece.SpawnPiece();
         }
         public void AddScore(Int16 _value)
         {
             score += _value;
             if (boardUI == null) return;
-            boardUI.ChangeScore(score);
         }
         private void OnPieceCollision()
         {
@@ -54,7 +60,6 @@ namespace Tetris
                 return;
             currentPiece.Dispose();
             CreateNewPiece();
-            int test = (int)currentPiece.CurrentPosition.Y + currentPiece.Piece.GetLength(0)-1;
             score += (short)(GetFullLines() * scorePerLine);
             if (boardUI == null) return;
             boardUI.ChangeScore(score);
@@ -133,13 +138,11 @@ namespace Tetris
         private int tetrisRows;
         private int tetrisCols;
         private int infoCols;
-        private bool[,]? tetrisField;
         public TetrisBoardUI(int tetrisRows,int tetrisCols, int infoCols)
         {
             this.tetrisRows = tetrisRows;
             this.tetrisCols = tetrisCols;
             this.infoCols = infoCols;
-            tetrisField = new bool[tetrisRows,tetrisCols];
         }
         public void DrawFrame()
         {
@@ -167,12 +170,13 @@ namespace Tetris
         }
         public void DrawInfo()
         {
-            Write("Score:", 5, tetrisCols + 3);
-            Write("0", 6, tetrisCols + 3);
+            WriteAtPosition("Score:", 5, tetrisCols + 3);
+            WriteAtPosition("0", 6, tetrisCols + 3);
+            
         }
         public void DrawTetrisBoard(bool [,] _board)
         {
-
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
             for (int row = 0; row < _board.GetLength(0); row++)
             {
                 string line = "";
@@ -180,17 +184,17 @@ namespace Tetris
                 {
                     if (_board[row, col])
                     {
-                        line += $"{PieceSymbol}";
+                        line += PieceSymbol;
                     }
                     else
                     {
                         line += " ";
                     }
                 }
-                Write(line, row + 1, 1);
+                WriteAtPosition(line, row + 1, 1);
             }
         }
-        public void DrawTetrisPiece(bool[,] _pieceType, Vector2 _piecePosition)
+        public void DrawTetrisPiece(bool[,] _pieceType, Vector2 _piecePosition, string _pieceDescription)
         {
 
             for (int row = 0; row < _pieceType.GetLength(0); row++)
@@ -199,23 +203,56 @@ namespace Tetris
                 {
                     if (_pieceType[row, col])
                     {
-                        Write($"{PieceSymbol}", row + 1 + (int)_piecePosition.Y, col + 1 + (int)_piecePosition.X);
+                        SetPieceColor(_pieceDescription);
+                        WriteAtPosition(PieceSymbol, row + (int)_piecePosition.Y, col + 1 + (int)_piecePosition.X);
                     }
                 }
             }
         }
         public void DrawGameOver()
         {
-            Write("GameOver", 9, tetrisCols + 3);
+            Console.ForegroundColor = ConsoleColor.Red;
+            WriteAtPosition("GameOver", 11, tetrisCols + 3);
         }
         public void ChangeScore(int _score)
         {
-            Write(_score.ToString(),6, tetrisCols +3);
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            WriteAtPosition(_score.ToString(),6, tetrisCols +3);
         }
-        private void Write(string text, int row, int col)
+        private void WriteAtPosition(string text, int row, int col)
         {
             Console.SetCursorPosition(col, row);
             Console.Write(text);
+        }
+        private void SetPieceColor(string _pieceDescription)
+        {
+            switch (_pieceDescription)
+            {
+                case "I":
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    break;
+                case "O":
+                    Console.ForegroundColor = ConsoleColor.DarkGreen;
+                    break;
+                case "T":
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    break;
+                case "S":
+                    Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                    break;
+                case "Z":
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    break;
+                case "L":
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    break;
+                case "J":
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+                default:
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    break;
+            }
         }
     }
     
