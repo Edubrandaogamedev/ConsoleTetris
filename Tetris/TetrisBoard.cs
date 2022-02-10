@@ -40,12 +40,21 @@ namespace Tetris
             currentPiece = new TetrisPiece(tetrisBoardMap);
             currentPiece.onCollision += OnPieceCollision;
         }
+        public void AddScore(Int16 _value)
+        {
+            score += _value;
+            if (boardUI == null) return;
+            boardUI.ChangeScore(score);
+        }
         private void OnPieceCollision()
         {
             AddPieceToStaticPosition();
-            if (currentPiece == null) return;
+            if (currentPiece == null || currentPiece.Piece == null) return;
+            if (IsGameOver())
+                return;
             currentPiece.Dispose();
             CreateNewPiece();
+            int test = (int)currentPiece.CurrentPosition.Y + currentPiece.Piece.GetLength(0)-1;
             score += (short)(GetFullLines() * scorePerLine);
             if (boardUI == null) return;
             boardUI.ChangeScore(score);
@@ -63,6 +72,21 @@ namespace Tetris
                     }
                 }
             }
+        }
+        private bool IsGameOver()
+        {
+            if (currentPiece == null || currentPiece.Piece == null) return false;
+            for (int row = 0; row < currentPiece.Piece.GetLength(0); row++)
+            {
+                if (currentPiece.CurrentPosition.Y - row < 1)
+                {
+                    Program.isGameOver = true;
+                    if (boardUI != null)
+                        boardUI.DrawGameOver();
+                    return true;
+                }
+            }
+            return false;
         }
         private Int16 GetFullLines()
         {
@@ -144,15 +168,7 @@ namespace Tetris
         public void DrawInfo()
         {
             Write("Score:", 5, tetrisCols + 3);
-            Write("0", 7, tetrisCols + 3);
-            Write("High Score:", 9, tetrisCols + 3);
-            //Write(HighScore.ToString(), 11, board.TetrisCols + 3);
-            Write("Next figure:", 13, tetrisCols + 3);
-            // DrawNextFigure();
-            // Write("Keys:", 18, tetrisCols + 3);
-            // Write("  ^  ", 19, tetrisCols + 3);
-            // Write("<   >", 20, tetrisCols + 3);
-            // Write("  v ", 21, tetrisCols + 3);
+            Write("0", 6, tetrisCols + 3);
         }
         public void DrawTetrisBoard(bool [,] _board)
         {
@@ -188,9 +204,13 @@ namespace Tetris
                 }
             }
         }
+        public void DrawGameOver()
+        {
+            Write("GameOver", 9, tetrisCols + 3);
+        }
         public void ChangeScore(int _score)
         {
-            Write(_score.ToString(),7, tetrisCols +3);
+            Write(_score.ToString(),6, tetrisCols +3);
         }
         private void Write(string text, int row, int col)
         {

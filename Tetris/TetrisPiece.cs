@@ -11,7 +11,6 @@ namespace Tetris
         public bool[,]? Piece { get => piece;}
         private Vector2 currentPosition;
         public Vector2 CurrentPosition { get => currentPosition;}
-
         public TetrisPiece(bool [,] _board)
         {
             this.board = _board;
@@ -23,9 +22,12 @@ namespace Tetris
         {
             InputReader.onMovementKeyPressed -= TetrisMovement;   
             InputReader.onRotationKeyPressed -=  TetrisRotation;
-            foreach(Delegate d in onCollision.GetInvocationList())
+            if (onCollision != null)
             {
-                onCollision -= (Collision)d;
+                foreach(Delegate d in onCollision.GetInvocationList())
+                {
+                    onCollision -= (Collision)d;
+                }
             }
             GC.SuppressFinalize(this);
         }
@@ -42,7 +44,7 @@ namespace Tetris
         private void CheckCollision()
         {
             if (piece == null || board == null) return;
-            if (currentPosition.X > board.GetLength(1) - piece.GetLength(1))
+            if (currentPosition.X + piece.GetLength(1) > board.GetLength(1))
             {
                 onCollision?.Invoke();
             }
@@ -64,21 +66,98 @@ namespace Tetris
         private void TetrisMovement(Vector2 _direction)
         {
             if (piece == null || board == null) return;
-            if (_direction.X == 1) //left
+            if (_direction.X == 1) //left (right person perspective)
             {
-                if ((currentPosition.X < board.GetLength(1) - piece.GetLength(1)))
-                    currentPosition += _direction;
+                if (currentPosition.X + piece.GetLength(1) < board.GetLength(1))
+                {
+                    bool movementAllowed = true;
+                    for (int row = 0; row < piece.GetLength(0); row++)
+                    {
+                        for (int col = 0; col < piece.GetLength(1); col++)
+                        {
+                            if (piece[row, col] && !board[(int)currentPosition.Y + row, (int)currentPosition.X +col+(int)_direction.X])
+                                movementAllowed = true;
+                            else if (piece[row,col] && board[(int)currentPosition.Y + row, (int)currentPosition.X +col+(int)_direction.X])
+                                movementAllowed = false;
+                        }
+                    }
+                    if (movementAllowed)
+                        currentPosition += _direction;
+                }
             }
-            else if(_direction.X == -1) //right
+            else if(_direction.X == -1) //right (left person perspective)
             {
-                if (currentPosition.X >= 1)
-                    currentPosition += _direction;
+                if (currentPosition.X > 0)
+                {
+                    bool movementAllowed = true;
+                    for (int row = 0; row < piece.GetLength(0); row++)
+                    {
+                        for (int col = 0; col < piece.GetLength(1); col++)
+                        {
+                            if (piece[row, col] && !board[(int)currentPosition.Y + row, (int)currentPosition.X+(int)_direction.X])
+                                movementAllowed = true;
+                            else if (piece[row,col] && board[(int)currentPosition.Y + row, (int)currentPosition.X+(int)_direction.X])
+                                movementAllowed = false;
+                        }
+                    }
+                    if (movementAllowed)
+                        currentPosition += _direction;
+                }
             }
             CheckCollision();
         }
         private void TetrisRotation(Vector2 _direction)
         {
-            //Console.WriteLine(direction);
+            if( piece == null) return;
+            bool[,] previewRotatedPiece = new bool[piece.GetLength(1), piece.GetLength(0)];
+            if (_direction.Y == 1)
+            {   
+                for (int row = 0; row < piece.GetLength(0); row++)
+                {
+                    for (int col = 0; col < piece.GetLength(1); col++)
+                    {
+                        previewRotatedPiece[col, piece.GetLength(0) - row - 1] = piece[row, col];
+                    }
+                }
+            }
+            else if (_direction.Y == -1)
+            {
+                for (int row = 0; row < piece.GetLength(0); row++)
+                {
+                    for (int col = 0; col < piece.GetLength(1); col++)
+                    {
+                        previewRotatedPiece[piece.GetLength(1) - col - 1 , row] = piece[row, col];
+                    }
+                }
+            }
+            if (CanRotate(previewRotatedPiece))
+            {
+                piece = previewRotatedPiece;
+                CheckCollision();
+            }
+        }
+        private bool CanRotate(bool[,] _targetPiece)
+        {
+            if (_targetPiece == null || board == null) return false;
+            if (currentPosition.X > board.GetLength(1) - _targetPiece.GetLength(1))
+            {
+                return false;
+            }
+            if (currentPosition.Y + _targetPiece.GetLength(0) == board.GetLength(0)-1)
+            {
+                return false;
+            }
+            for (int row = 0; row < _targetPiece.GetLength(0); row++)
+            {
+                for (int col = 0; col < _targetPiece.GetLength(1); col++)
+                {
+                    if (_targetPiece[row, col] && board[(int)currentPosition.Y + row + 1, (int)currentPosition.X + col])
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
         private void SpawnPiece()
         {
