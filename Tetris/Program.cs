@@ -19,7 +19,7 @@ namespace Tetris
             while(!isGameOver)
             {
                 TimeSpan timePassed = stopWatch.Elapsed;
-                if (timePassed.TotalSeconds >= 0.4f) //tick time
+                if (timePassed.TotalSeconds >= 0.7f) //tick time
                 {
                     board.ForceMovePiece();
                     board.UpdateTetrisBoard();
