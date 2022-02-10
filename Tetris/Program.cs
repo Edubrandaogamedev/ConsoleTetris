@@ -1,6 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-
+﻿using System.Diagnostics;
+using System;
 namespace Tetris
 {
     class Program
@@ -30,12 +29,12 @@ namespace Tetris
         }
         private static void CreateWindow(int boardRows,int boardColumns)
         {
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.CursorVisible = false;
-                Console.WindowHeight = boardRows+ 2;
-                Console.WindowWidth = boardColumns + 3;
-                Console.BufferHeight = boardRows+ 2;
-                Console.BufferWidth = boardColumns + 3;
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.CursorVisible = false;
+            Console.WindowHeight = TetrisBoard.BoardRows + 2;
+            Console.WindowWidth = TetrisBoard.BoardCols + TetrisBoard.InfoCols + 3;
+            Console.BufferHeight = TetrisBoard.BoardRows + 3;
+            Console.BufferWidth = TetrisBoard.BoardCols + TetrisBoard.InfoCols + 10;
         }
     }
 }

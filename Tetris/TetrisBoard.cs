@@ -12,7 +12,7 @@ namespace Tetris
         private bool[,]? tetrisBoardMap;
         private TetrisBoardUI? boardUI;
         private TetrisPiece? currentPiece;
-        private TetrisPiece? nextPiece;
+        //private TetrisPiece? nextPiece;
         public TetrisBoard()
         {
             tetrisBoardMap = new bool[BoardRows,BoardCols];
@@ -204,7 +204,7 @@ namespace Tetris
                     if (_pieceType[row, col])
                     {
                         SetPieceColor(_pieceDescription);
-                        WriteAtPosition(PieceSymbol, row + (int)_piecePosition.Y, col + 1 + (int)_piecePosition.X);
+                        WriteAtPosition(PieceSymbol, row + (int)_piecePosition.Y+1, col + 1 + (int)_piecePosition.X);
                     }
                 }
             }
