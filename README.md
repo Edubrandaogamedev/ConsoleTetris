@@ -1,8 +1,8 @@
-#Tetris Project
+# Tetris Project
 
 This project used dotnet 6.0
 
-##Tutorial
+## Tutorial
 
 - Movement
   - Left Arrow / A: Move the piece to the left (or to the right from piece point of view)
