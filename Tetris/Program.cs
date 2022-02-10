@@ -33,8 +33,8 @@ namespace Tetris
             Console.CursorVisible = false;
             Console.WindowHeight = TetrisBoard.BoardRows + 2;
             Console.WindowWidth = TetrisBoard.BoardCols + TetrisBoard.InfoCols + 3;
-            Console.BufferHeight = TetrisBoard.BoardRows + 3;
-            Console.BufferWidth = TetrisBoard.BoardCols + TetrisBoard.InfoCols + 10;
+            Console.BufferHeight = TetrisBoard.BoardRows + 2;
+            Console.BufferWidth = TetrisBoard.BoardCols + TetrisBoard.InfoCols + 5;
         }
     }
 }

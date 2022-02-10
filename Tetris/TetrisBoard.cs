@@ -1,5 +1,5 @@
 using System.Numerics;
-
+using System;
 namespace Tetris
 {
     public class TetrisBoard
@@ -177,7 +177,7 @@ namespace Tetris
         public void DrawTetrisBoard(bool [,] _board)
         {
             Console.ForegroundColor = ConsoleColor.DarkCyan;
-            for (int row = 0; row < _board.GetLength(0); row++)
+            for (int row = 1; row < _board.GetLength(0)-1; row++)
             {
                 string line = "";
                 for (int col = 0; col < _board.GetLength(1); col++)
@@ -188,10 +188,10 @@ namespace Tetris
                     }
                     else
                     {
-                        line += " ";
+                        line += "-";
                     }
                 }
-                WriteAtPosition(line, row + 1, 1);
+                WriteAtPosition(line, row+1,1);
             }
         }
         public void DrawTetrisPiece(bool[,] _pieceType, Vector2 _piecePosition, string _pieceDescription)

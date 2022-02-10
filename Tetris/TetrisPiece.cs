@@ -13,6 +13,7 @@ namespace Tetris
         public string PieceDescription {get => pieceDescription;}
         private Vector2 currentPosition;
         public Vector2 CurrentPosition { get => currentPosition;}
+        private bool isMovementCheckDone = true;
         public TetrisPiece(bool [,] _board)
         {
             this.board = _board;
@@ -36,11 +37,14 @@ namespace Tetris
         {
             Vector2 downDir = new Vector2(0,1);
             if (piece == null || board == null) return;
+            if (currentPosition.Y + piece.GetLength(0) < board.GetLength(0)-1) //board row length - 1, because the border
             {
-                if (currentPosition.Y + piece.GetLength(0) < board.GetLength(0)-1) //board row length - 1, because the border
-                    currentPosition += downDir;
+                while (isMovementCheckDone == false) //if the code still calculating the input, make a hold until is possible to bring the piece down
+                {
+                }
+                currentPosition += downDir;
+                CheckCollision();
             }
-            CheckCollision();
         }
         public void SpawnPiece()
         {
@@ -76,6 +80,7 @@ namespace Tetris
         private void TetrisMovement(Vector2 _direction)
         {
             if (piece == null || board == null) return;
+            isMovementCheckDone = false;
             if (_direction.X == 1) //left (right user perspective)
             {
                 if (currentPosition.X + piece.GetLength(1) < board.GetLength(1))
@@ -111,6 +116,7 @@ namespace Tetris
                         currentPosition += _direction;
                 }
             }
+            isMovementCheckDone = true;
             CheckCollision();
         }
         private void TetrisTryRotation(Vector2 _direction)
